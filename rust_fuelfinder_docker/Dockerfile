@@ -18,11 +18,18 @@ RUN cargo build --release --bin fuelfinder_server
 
 # Stage 4: Lean Runtime
 # Using debian-slim makes the final image ~80MB instead of 1GB+
-FROM debian:bookworm-slim AS runtime
+# Stage 4: Runtime
+# Use 'trixie' instead of 'bookworm' to get GLIBC 2.38+ support
+FROM debian:trixie-slim AS runtime
 WORKDIR /app
-# Install OpenSSL as it's a common dependency for web servers
-RUN apt-get update && apt-get install -y libssl3 ca-certificates && rm -rf /var/lib/apt/lists/*
-# Copy only the compiled binary from the builder
+
+# Install the essentials
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates libssl3 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy the binary from the builder stage
+# Replace 'fuelfinder_server' with your exact binary name if different
 COPY --from=builder /app/target/release/fuelfinder_server /usr/local/bin/app
-# Set the execution command
+
 ENTRYPOINT ["/usr/local/bin/app"]
