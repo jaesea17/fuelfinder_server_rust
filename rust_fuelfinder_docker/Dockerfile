@@ -3,7 +3,7 @@
 FROM lukemathwalker/cargo-chef:latest-rust-1.80 AS planner
 WORKDIR /app
 COPY . .
-RUN cargo chef prepare --recipe-json recipe.json
+RUN cargo chef prepare --recipe-path recipe.json
 
 # Stage 2: Build dependencies
 FROM lukemathwalker/cargo-chef:latest-rust-1.80 AS builder
