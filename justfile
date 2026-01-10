@@ -14,7 +14,7 @@ build-prod:
 
 # Build docker
 build-docker:
-    @Cargo docker build -t fuelfinder_server .
+    @cargo docker build -t fuelfinder_server -f ./rust_fuelfinder_docker/Dockerfile .
 
 # Recipe for running all tests
 test:

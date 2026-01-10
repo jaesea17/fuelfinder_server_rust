@@ -1,14 +1,14 @@
 # Stage 1: Compute a recipe
-FROM lucatadei/cargo-chef:latest-rust-1.80 AS planner
+# Use the official lukemathwalker image instead
+FROM lukemathwalker/cargo-chef:latest-rust-1.80 AS planner
 WORKDIR /app
 COPY . .
 RUN cargo chef prepare --recipe-json recipe.json
 
-# Stage 2: Build dependencies (This layer is cached!)
-FROM lucatadei/cargo-chef:latest-rust-1.80 AS builder
+# Stage 2: Build dependencies
+FROM lukemathwalker/cargo-chef:latest-rust-1.80 AS builder
 WORKDIR /app
 COPY --from=planner /app/recipe.json recipe.json
-# This is the magic step that builds only your dependencies
 RUN cargo chef cook --release --recipe-json recipe.json
 
 # Stage 3: Build the actual application
