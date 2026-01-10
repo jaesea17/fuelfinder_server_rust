@@ -13,6 +13,7 @@ RUN cargo chef cook --release --recipe-path recipe.json
 
 # Stage 3: Build the actual application
 COPY . .
+ENV SQLX_OFFLINE=true
 RUN cargo build --release --bin fuelfinder_server
 
 # Stage 4: Lean Runtime

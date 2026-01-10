@@ -1,0 +1,82 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO stations (\n                    name, address, email, phone, password, latitude, longitude\n                )\n                VALUES ($1, $2, $3, $4, $5, $6, $7)\n                RETURNING id, name, address, email, phone, latitude, longitude, role, created_at, updated_at\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "address",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "phone",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "latitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 6,
+        "name": "longitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "role",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 9,
+        "name": "updated_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Float8",
+        "Float8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "cc2e6226da02b8c3e932768e2aed1f98984883f9bf6d8e2ea2ba75f3ec8eddd1"
+}

@@ -1,0 +1,118 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT \n                    s.id, s.name, s.address, s.email, s.phone, \n                    s.latitude, s.longitude, s.role, s.password,\n                    s.created_at, s.updated_at,\n                    -- Add distance calculation here if you need it, else keep it as NULL/Option\n                    NULL::float8 as \"distance?\", \n                    c.id as commodity_id, \n                    c.name as commodity_name, \n                    c.is_available as \"is_available!\", \n                    c.price as price,\n                    c.station_id as \"station_id!\"\n                FROM stations s\n                INNER JOIN commodities c ON s.id = c.station_id\n                WHERE s.email = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "address",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "phone",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "latitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 6,
+        "name": "longitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "role",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "password",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 10,
+        "name": "updated_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 11,
+        "name": "distance?",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 12,
+        "name": "commodity_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 13,
+        "name": "commodity_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 14,
+        "name": "is_available!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 15,
+        "name": "price",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 16,
+        "name": "station_id!",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "f407b1be3594b3b64b6f0b4ee2e3ec9b0901f6ab003346665f04bc59a26712fe"
+}

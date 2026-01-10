@@ -1,0 +1,119 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                s.id AS id,\n                s.name AS name,\n                s.address AS address,\n                s.email AS email,\n                s.password AS password,\n                s.phone AS phone,\n                s.latitude AS latitude,\n                s.longitude AS longitude,\n                s.role AS role,\n                s.created_at AS created_at,\n                s.updated_at AS updated_at,\n                -- Call your custom function here to populate the column\n                haversine($1::float8, $2::float8, s.latitude, s.longitude) AS \"distance!\",\n\n                c.id AS commodity_id,\n                c.name AS commodity_name,\n                c.is_available AS \"is_available!\",\n                c.station_id AS \"station_id!\",\n                c.price AS price\n            FROM stations AS s\n            \n            INNER JOIN commodities AS c ON s.id = c.station_id AND c.is_available = TRUE\n            \n            WHERE s.id IN (\n                SELECT sub_s.id\n                FROM stations AS sub_s\n                WHERE EXISTS (\n                    SELECT 1 FROM commodities AS sub_c \n                    WHERE sub_c.station_id = sub_s.id AND sub_c.is_available = TRUE\n                )\n                -- Keep the ordering here to pick the correct 4 IDs\n                ORDER BY haversine($1::float8, $2::float8, sub_s.latitude, sub_s.longitude) ASC\n                LIMIT 4\n            )\n            -- Grouping by ID and then sorting by distance so the nearest station is first in your Rust Vec\n            ORDER BY \"distance!\", s.id, c.name\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "address",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "password",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "phone",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "latitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "longitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 8,
+        "name": "role",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 10,
+        "name": "updated_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 11,
+        "name": "distance!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 12,
+        "name": "commodity_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 13,
+        "name": "commodity_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 14,
+        "name": "is_available!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 15,
+        "name": "station_id!",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 16,
+        "name": "price",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Float8",
+        "Float8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "d496dd5f3104009996726e4a8c2cdedb73370e3918ac860783c21aaee8e4265d"
+}
