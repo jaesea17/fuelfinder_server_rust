@@ -9,7 +9,7 @@ RUN cargo chef prepare --recipe-json recipe.json
 FROM lukemathwalker/cargo-chef:latest-rust-1.80 AS builder
 WORKDIR /app
 COPY --from=planner /app/recipe.json recipe.json
-RUN cargo chef cook --release --recipe-json recipe.json
+RUN cargo chef cook --release --recipe-path recipe.json
 
 # Stage 3: Build the actual application
 COPY . .
