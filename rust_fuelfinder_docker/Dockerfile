@@ -1,12 +1,12 @@
 # Stage 1: Compute a recipe
 # Use the official lukemathwalker image instead
-FROM lukemathwalker/cargo-chef:latest-rust-1.85 AS planner
+FROM lukemathwalker/cargo-chef:latest-rust-1.92 AS planner
 WORKDIR /app
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
 # Stage 2: Build dependencies
-FROM lukemathwalker/cargo-chef:latest-rust-1.85 AS builder
+FROM lukemathwalker/cargo-chef:latest-rust-1.92 AS builder
 WORKDIR /app
 COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
