@@ -1,0 +1,52 @@
+version: "3"
+
+volumes:
+  # The volume name in services must match this (corrected name)
+  rustfuelfinder_data:
+
+services:
+  # 1. The Database service (as you defined it)
+  db:
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d rust_fuel_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    image: postgres:14-alpine
+    env_file:
+      - postgres.env
+    ports:
+      - 4444:5432
+    volumes:
+      # Use the correct volume name defined above
+      - rustfuelfinder_data:/var/lib/postgresql/data
+    restart: always
+
+  # 2. The Application service (New)
+  api:
+    build:
+      # Define the build context: the current directory ('.')
+      # which must contain the Cargo.toml file.
+      context: ../
+      # Optional: Explicitly specify the Dockerfile name
+      dockerfile: ./rust_fuelfinder_docker/Dockerfile
+
+    # Or use 'image' if you pre-built and pushed the image
+    # image: your-registry/fuelfinder-api:latest
+
+    ports:
+      # Map the Axum port (e.g., 8000) to the host
+      - 8000:8000
+
+    # Pass necessary database connection details to the app
+    env_file:
+      - postgres.env
+
+    # Ensure the API service waits for the database to be ready
+    depends_on:
+      db:
+        condition: service_healthy
+
+    # Optional: If you use hot-reloading (not common for Rust prod)
+    # volumes:
+    #   - .:/usr/src/app

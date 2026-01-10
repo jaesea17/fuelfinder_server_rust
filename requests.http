@@ -1,0 +1,54 @@
+//AUTHENTICATION
+
+POST http://localhost:8000/api/v1/auth/signup HTTP/1.1
+content-type: application/json
+
+{
+    "name": "Conoil",
+    "address": "Jahi",
+    "email": "conoil@gmail.com",
+    "phone": "08034499111",
+    "password": "pass",
+    "latitude": 8.09,
+    "longitude": 4.16
+}
+
+###
+
+POST http://localhost:8000/api/v1/auth/signin HTTP/1.1
+content-type: application/json
+
+{
+    "email": "aarano@gmail.com",
+    "password": "pass"
+}
+
+###
+
+// STATIONS
+GET http://localhost:8000/api/v1/stations HTTP/1.1
+
+###
+
+GET http://localhost:8000/api/v1/stations/closest?latitude=8.20&longitude=7.8 HTTP/1.1
+
+
+
+###
+
+// COMMODITIES
+
+GET http://localhost:8000/api/v1/commodities HTTP/1.1
+
+###
+
+PATCH http://localhost:8000/api/v1/commodities/8ea3e299-6ff9-4319-b979-c760cd561a7f HTTP/1.1
+content-type: application/json
+
+{
+    "price": "111",
+    "is_available": true
+}
+
+###
+
