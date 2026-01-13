@@ -19,6 +19,7 @@ pub struct CreateStationDto {
     pub password: String,
     pub latitude: f64,
     pub longitude: f64,
+    pub code: String,
 }
 
 #[derive(Debug, sqlx::FromRow, Serialize)]

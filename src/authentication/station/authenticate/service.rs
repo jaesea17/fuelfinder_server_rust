@@ -8,8 +8,8 @@ use crate::{
         token::service::{ApiMessage, TokenService},
     },
     domain::{
-        commodities::commodity::Commodity, stations::station::Station,
-        utils::errors::station_errors::StationError,
+        commodities::commodity::Commodity, registration_code::dto::RegistrationCode,
+        stations::station::Station, utils::errors::station_errors::StationError,
     },
 };
 use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
@@ -20,6 +20,108 @@ use std::env;
 const BCRYPT_COST: u32 = 12;
 
 impl StationWithCommodity {
+    pub async fn signup(
+        State(app_state): State<AppState>,
+        Json(body): Json<CreateStationDto>,
+    ) -> Result<impl IntoResponse, StationError> {
+        //get name, address,
+        // let address = body.address.trim().to_lowercase();
+        let code = body.code.trim();
+        let email = body.email.trim();
+        // check if registration code is still valid
+        let is_valid: Option<Option<i32>> = sqlx::query_scalar!(
+            "SELECT 1 FROM registration_code WHERE code = $1 AND is_valid = true",
+            code
+        )
+        .fetch_optional(&app_state.pool)
+        .await?;
+        if is_valid.is_some_and(|x| x.is_some() == true) {
+            return Err(StationError::NotFound(
+                "invalid registration code".to_string(),
+            ));
+        };
+        let exists: Option<Option<i32>> =
+            sqlx::query_scalar!("SELECT 1 FROM stations WHERE email = $1", email)
+                .fetch_optional(&app_state.pool)
+                .await?;
+
+        if exists.is_some_and(|x| x.is_some() == true) {
+            return Err(StationError::AlreadyExists);
+        };
+
+        let CreateStationDto {
+            name,
+            address,
+            email,
+            phone,
+            password,
+            latitude,
+            longitude,
+            code,
+        } = body;
+
+        //hash the password
+        let hashed_password = StationWithCommodity::hash_password(&password)
+            .await
+            .expect("Couldn't hash password"); // TODO handle gracefully bcrypt err
+
+        let new_station: Station = sqlx::query_as!(
+            Station,
+            r#"
+                INSERT INTO stations (
+                    name, address, email, phone, password, latitude, longitude
+                )
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                RETURNING id, name, address, email, phone, latitude, longitude, role, created_at, updated_at, code
+            "#,
+            name, address, email, phone, hashed_password, latitude, longitude, code
+        )
+        .fetch_one(&app_state.pool)
+        .await
+        .map_err(|err| StationError::DatabaseError(err))?;
+
+        let station_id = new_station.id;
+        let name = "petrol";
+        //Creating Petrol commodity
+        let new_commodity: Commodity = sqlx::query_as!(
+            Commodity,
+            r#"
+                INSERT INTO commodities (
+                    name, station_id
+                )
+                VALUES ($1, $2)
+                RETURNING name, id, price, is_available, created_at, updated_at, station_id
+            "#,
+            name,
+            station_id
+        )
+        .fetch_one(&app_state.pool)
+        .await
+        .map_err(|err| StationError::DatabaseError(err))?;
+
+        //Update the registration_codes table
+        sqlx::query!(
+            r#"
+                INSERT INTO registration_codes (station_id)
+                VALUES ($1)
+            "#,
+            station_id
+        )
+        .execute(&app_state.pool)
+        .await
+        .map_err(|err| StationError::DatabaseError(err))?;
+
+        let mut new_station: StationResponse = new_station.into();
+        new_station.commodities = vec![CommoditiesResponse {
+            id: new_commodity.id,
+            name: new_commodity.name,
+            is_available: new_commodity.is_available,
+            price: new_commodity.price,
+            station_id: new_commodity.station_id,
+        }];
+        Ok((StatusCode::CREATED, Json(new_station)))
+    }
+
     pub async fn signin(
         State(app_state): State<AppState>,
         Json(body): Json<StationSigninDto>,
@@ -98,82 +200,6 @@ impl StationWithCommodity {
                     .into_response())
             }
         }
-    }
-
-    pub async fn signup(
-        State(app_state): State<AppState>,
-        Json(body): Json<CreateStationDto>,
-    ) -> Result<impl IntoResponse, StationError> {
-        //get name, address,
-        // let address = body.address.trim().to_lowercase();
-        let email = body.email.trim();
-        let exists: Option<Option<i32>> =
-            sqlx::query_scalar!("SELECT 1 FROM stations WHERE email = $1", email)
-                .fetch_optional(&app_state.pool)
-                .await?;
-
-        if exists.is_some_and(|x| x.is_some() == true) {
-            return Err(StationError::AlreadyExists);
-        };
-
-        let CreateStationDto {
-            name,
-            address,
-            email,
-            phone,
-            password,
-            latitude,
-            longitude,
-        } = body;
-
-        //hash the password
-        let hashed_password = StationWithCommodity::hash_password(&password)
-            .await
-            .expect("Couldn't hash password"); // TODO handle gracefully bcrypt err
-
-        let new_station = sqlx::query_as!(
-            Station,
-            r#"
-                INSERT INTO stations (
-                    name, address, email, phone, password, latitude, longitude
-                )
-                VALUES ($1, $2, $3, $4, $5, $6, $7)
-                RETURNING id, name, address, email, phone, latitude, longitude, role, created_at, updated_at
-            "#,
-            name, address, email, phone, hashed_password, latitude, longitude
-        )
-        .fetch_one(&app_state.pool)
-        .await
-        .map_err(|err| StationError::DatabaseError(err))?;
-
-        let station_id = new_station.id;
-        let name = "petrol";
-        //Creating Petrol commodity
-        let new_commodity: Commodity = sqlx::query_as!(
-            Commodity,
-            r#"
-                INSERT INTO commodities (
-                    name, station_id
-                )
-                VALUES ($1, $2)
-                RETURNING name, id, price, is_available, created_at, updated_at, station_id
-            "#,
-            name,
-            station_id
-        )
-        .fetch_one(&app_state.pool)
-        .await
-        .map_err(|err| StationError::DatabaseError(err))?;
-
-        let mut new_station: StationResponse = new_station.into();
-        new_station.commodities = vec![CommoditiesResponse {
-            id: new_commodity.id,
-            name: new_commodity.name,
-            is_available: new_commodity.is_available,
-            price: new_commodity.price,
-            station_id: new_commodity.station_id,
-        }];
-        Ok((StatusCode::CREATED, Json(new_station)))
     }
 
     pub async fn hash_password(plaintext_password: &str) -> Result<String, bcrypt::BcryptError> {

@@ -48,3 +48,5 @@ db_stop:
 
 reset_db:
     @sqlx database drop && sqlx database create && sqlx migrate run
+
+# sqlx migrate add <description>
