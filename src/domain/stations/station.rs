@@ -63,7 +63,7 @@ impl Station {
             .parse::<f64>()
             .map_err(|_| StationError::WrongCredentials("longitude".to_string()))?; //todo change it to a better error, may wrong values
 
-        let _ = validate_boundary::validate_abuja_bounds(latitude, longitude);
+        let _ = validate_boundary::validate_abuja_bounds(latitude, longitude)?;
 
         let rows = sqlx::query_as!(
             StationWithCommodity,

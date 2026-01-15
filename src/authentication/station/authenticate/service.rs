@@ -62,7 +62,7 @@ impl StationWithCommodity {
             code,
         } = body;
 
-        let _ = validate_boundary::validate_abuja_bounds(latitude, longitude);
+        let _ = validate_boundary::validate_abuja_bounds(latitude, longitude)?;
 
         //hash the password
         let hashed_password = StationWithCommodity::hash_password(&password)
