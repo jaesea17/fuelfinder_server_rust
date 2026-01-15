@@ -29,13 +29,14 @@ impl StationWithCommodity {
         let code = body.code.trim();
         let email = body.email.trim();
         // check if registration code is still valid
+        println!("the value of code: {code}");
         let is_valid: Option<Option<i32>> = sqlx::query_scalar!(
-            "SELECT 1 FROM registration_code WHERE code = $1 AND is_valid = true",
+            "SELECT 1 FROM registration_codes WHERE code = $1 AND is_valid = true",
             code
         )
         .fetch_optional(&app_state.pool)
         .await?;
-        if is_valid.is_some_and(|x| x.is_some() == true) {
+        if is_valid.flatten().is_none() {
             return Err(StationError::NotFound(
                 "invalid registration code".to_string(),
             ));
@@ -45,7 +46,7 @@ impl StationWithCommodity {
                 .fetch_optional(&app_state.pool)
                 .await?;
 
-        if exists.is_some_and(|x| x.is_some() == true) {
+        if exists.flatten().is_some() {
             return Err(StationError::AlreadyExists);
         };
 
@@ -72,9 +73,9 @@ impl StationWithCommodity {
                     name, address, email, phone, password, latitude, longitude
                 )
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
-                RETURNING id, name, address, email, phone, latitude, longitude, role, created_at, updated_at, code
+                RETURNING id, name, address, email, phone, latitude, longitude, role, created_at, updated_at
             "#,
-            name, address, email, phone, hashed_password, latitude, longitude, code
+            name, address, email, phone, hashed_password, latitude, longitude
         )
         .fetch_one(&app_state.pool)
         .await
@@ -99,13 +100,18 @@ impl StationWithCommodity {
         .await
         .map_err(|err| StationError::DatabaseError(err))?;
 
-        //Update the registration_codes table
+        // Update the registration_codes table
         sqlx::query!(
             r#"
-                INSERT INTO registration_codes (station_id)
-                VALUES ($1)
+                UPDATE registration_codes
+                SET
+                    station_id = $1,
+                    is_valid = $2
+                WHERE code = $3
             "#,
-            station_id
+            station_id,
+            false,
+            code
         )
         .execute(&app_state.pool)
         .await
