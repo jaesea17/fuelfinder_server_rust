@@ -29,7 +29,6 @@ impl StationWithCommodity {
         let code = body.code.trim();
         let email = body.email.trim();
         // check if registration code is still valid
-        println!("the value of code: {code}");
         let is_valid: Option<Option<i32>> = sqlx::query_scalar!(
             "SELECT 1 FROM registration_codes WHERE code = $1 AND is_valid = true",
             code
