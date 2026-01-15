@@ -1,7 +1,7 @@
 use crate::{
-    app_state::AppState, authentication::{ roles::roles::UserRole, station::authenticate::{dto::{StationResponse, StationWithCommodity, map_rows_to_stations, CommoditiesResponse}, token::service::Claims}}, domain::{
+    app_state::AppState, authentication::{ roles::roles::UserRole, station::authenticate::{dto::{CommoditiesResponse, StationResponse, StationWithCommodity, map_rows_to_stations}, token::service::Claims}}, domain::{
         stations::dto::StationQueryParam,
-        utils::errors::station_errors::StationError,
+        utils::{errors::station_errors::StationError, validate_boundary},
     }
 };
 use axum::{
@@ -62,6 +62,8 @@ impl Station {
         let longitude = longitude
             .parse::<f64>()
             .map_err(|_| StationError::WrongCredentials("longitude".to_string()))?; //todo change it to a better error, may wrong values
+
+        let _ = validate_boundary::validate_abuja_bounds(latitude, longitude);
 
         let rows = sqlx::query_as!(
             StationWithCommodity,

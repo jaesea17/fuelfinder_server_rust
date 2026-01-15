@@ -8,8 +8,10 @@ use crate::{
         token::service::{ApiMessage, TokenService},
     },
     domain::{
-        commodities::commodity::Commodity, registration_code::dto::RegistrationCode,
-        stations::station::Station, utils::errors::station_errors::StationError,
+        commodities::commodity::Commodity,
+        registration_code::dto::RegistrationCode,
+        stations::station::Station,
+        utils::{errors::station_errors::StationError, validate_boundary},
     },
 };
 use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
@@ -59,6 +61,8 @@ impl StationWithCommodity {
             longitude,
             code,
         } = body;
+
+        let _ = validate_boundary::validate_abuja_bounds(latitude, longitude);
 
         //hash the password
         let hashed_password = StationWithCommodity::hash_password(&password)
