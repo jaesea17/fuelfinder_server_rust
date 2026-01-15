@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE registration_codes\n                SET\n                    station_id = $1,\n                    is_valid = $2\n                WHERE code = $3\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e890c0a26bafb30a2acc0320158f396ae9444747f3f05636bcc10d4d771d1842"
+}
