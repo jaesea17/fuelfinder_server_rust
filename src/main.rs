@@ -1,7 +1,10 @@
 #![forbid(clippy::unwrap_used)]
 
 use axum::Router;
-use http::header::{AUTHORIZATION, CONTENT_TYPE};
+use http::{
+    HeaderValue,
+    header::{AUTHORIZATION, CONTENT_TYPE},
+};
 use tower_http::cors::{Any, CorsLayer};
 
 mod app_state;
@@ -30,9 +33,17 @@ async fn main() {
 
     setup_tracing();
 
+    let origins = [
+        "http://127.0.0.1:3000".parse::<HeaderValue>().unwrap(),
+        "http://localhost:3000".parse::<HeaderValue>().unwrap(),
+        "https://fuelfinder-leptos-csr.vercel.app"
+            .parse::<HeaderValue>()
+            .unwrap(),
+    ];
+
     let cors = CorsLayer::new()
-        // .allow_origin("http://127.0.0.1:3000".parse::<HeaderValue>().unwrap())
-        .allow_origin(tower_http::cors::AllowOrigin::mirror_request())
+        // .allow_origin(tower_http::cors::AllowOrigin::mirror_request())
+        .allow_origin(origins)
         .allow_methods(Any)
         .allow_headers([AUTHORIZATION, CONTENT_TYPE]);
 
