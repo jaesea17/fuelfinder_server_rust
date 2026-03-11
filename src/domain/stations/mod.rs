@@ -1,3 +1,3 @@
-pub mod dto;
 pub mod routes;
-pub mod station;
+pub mod service;
+pub mod model;

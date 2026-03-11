@@ -42,6 +42,10 @@ services:
     env_file:
       - postgres.env
 
+    # tell the API which port to bind on (must match the `ports` mapping)
+    environment:
+      - PORT=8000
+
     # Ensure the API service waits for the database to be ready
     depends_on:
       db:

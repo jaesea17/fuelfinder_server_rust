@@ -4,7 +4,8 @@ use jsonwebtoken::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::authentication::station::authenticate::dto::StationResponse;
+use crate::domain::utils::schemas::StationResponse;
+
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Claims {

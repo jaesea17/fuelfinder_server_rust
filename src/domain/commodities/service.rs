@@ -1,7 +1,7 @@
 use crate::{
     app_state::AppState,
     domain::{
-        commodities::dto::{UpdateCommodityDto, UpdateCommodityResponse},
+        commodities::{dto::{UpdateCommodityDto, UpdateCommodityResponse}, model::Commodity},
         utils::errors::commodity_errors::CommodityError,
     },
 };
@@ -10,22 +10,8 @@ use axum::{
     extract::{Path, State},
     response::IntoResponse,
 };
-use chrono;
-use http::StatusCode;
-use serde::{Deserialize, Serialize};
-use sqlx::prelude::FromRow;
 use uuid::Uuid;
-
-#[derive(Debug, Serialize, FromRow, Deserialize)]
-pub struct Commodity {
-    pub id: Uuid,
-    pub name: String,
-    pub price: i32,
-    pub station_id: Uuid,
-    pub is_available: bool,
-    pub created_at: chrono::NaiveDateTime,
-    pub updated_at: chrono::NaiveDateTime,
-}
+use http::StatusCode;
 
 impl Commodity {
     pub async fn get_commodities(

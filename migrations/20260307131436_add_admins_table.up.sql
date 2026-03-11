@@ -1,0 +1,12 @@
+-- Add migration script here
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS admins (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    role VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    "created_at" TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
+    "updated_at" TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+COMMIT;

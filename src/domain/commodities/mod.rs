@@ -1,3 +1,4 @@
-pub mod commodity;
+pub mod service;
+pub mod model;
 pub mod dto;
 pub mod routes;

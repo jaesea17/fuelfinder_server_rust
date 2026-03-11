@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE stations DROP COLUMN IF EXISTS station_type;
+
+COMMIT;

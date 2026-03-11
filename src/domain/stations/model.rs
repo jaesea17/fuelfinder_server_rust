@@ -1,14 +1,11 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+use sqlx::prelude::FromRow;
 use uuid::Uuid;
+use chrono;
 
-#[derive(Debug, Deserialize)]
-pub struct StationQueryParam {
-    pub longitude: String,
-    pub latitude: String,
-}
-#[derive(Debug, sqlx::FromRow)]
+
+#[derive(Debug, Serialize, FromRow, Deserialize)]
 pub struct Station {
-    // Columns from the 'stations' table
     pub id: Uuid,
     pub name: String,
     pub address: String,
@@ -17,7 +14,7 @@ pub struct Station {
     pub latitude: f64,
     pub longitude: f64,
     pub role: String,
+    pub station_type: String,
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
-    pub distance_km: Option<f64>,
 }

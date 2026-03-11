@@ -25,7 +25,12 @@ use crate::{
 /*                         🦀 MAIN 🦀                         */
 /* ========================================================== */
 
-const PORT_8000: &str = "0.0.0.0:8000";
+// Allow the listen address/port to be overridden via the `PORT` env var
+// (used by Docker Compose, tests, etc). Defaults to 8000.
+fn listen_addr() -> String {
+    let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
+    format!("0.0.0.0:{}", port)
+}
 
 #[tokio::main]
 async fn main() {
@@ -63,7 +68,8 @@ async fn main() {
         .layer(cors);
     // let app = Router::new().merge(books_routes()).with_state(app_state);
 
-    let listener = tokio::net::TcpListener::bind(PORT_8000)
+    let addr = listen_addr();
+    let listener = tokio::net::TcpListener::bind(&addr)
         .await
         .expect("Failed to bind to address");
 

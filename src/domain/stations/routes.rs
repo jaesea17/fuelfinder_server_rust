@@ -2,7 +2,7 @@ use axum::{Router, middleware::from_fn, routing::get};
 
 use crate::{
     app_state::AppState, authentication::middleware::auth::authorize,
-    domain::stations::station::Station,
+    domain::stations::model::Station,
 };
 
 pub fn stations_route() -> Router<AppState> {

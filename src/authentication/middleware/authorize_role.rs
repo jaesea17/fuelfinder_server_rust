@@ -1,7 +1,7 @@
 use axum::{body::Body, extract::Request, http::StatusCode, middleware::Next, response::Response};
 
 use crate::authentication::{
-    roles::roles::UserRole, station::authenticate::token::service::Claims,
+    station::authenticate::token::service::Claims,
 };
 
 pub async fn authorize_role(

@@ -7,7 +7,7 @@ use axum::{
 use crate::{
     app_state::AppState,
     authentication::middleware::{auth::authorize, authorize_role::authorize_role},
-    domain::commodities::commodity::Commodity,
+    domain::commodities::model::Commodity,
 };
 
 pub fn commodities_route() -> Router<AppState> {

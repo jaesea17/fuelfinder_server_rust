@@ -1,3 +1,6 @@
+# this file assumes the server is running on port 8000 by default.
+# if you override the port with `PORT` env var (e.g. 8080), update the URLs below accordingly.
+
 //AUTHENTICATION
 
 POST http://localhost:8000/api/v1/auth/signup HTTP/1.1
@@ -15,22 +18,34 @@ content-type: application/json
 
 ###
 
-POST http://localhost:8000/api/v1/auth/signin HTTP/1.1
+POST http://localhost:8080/api/v1/auth/signin HTTP/1.1
 content-type: application/json
 
 {
-    "email": "aarano@gmail.com",
-    "password": "pass"
+    "email": "oando@gmail.com",
+    "password": "thepass",
+    "station_type": "petrol"
+}
+
+
+###
+
+POST http://localhost:8080/api/v1/auth/reg-code HTTP/1.1
+content-type: application/json
+
+{
+    "code": "xy123dr",
+    "super_password": "letmethrough"
 }
 
 ###
 
 // STATIONS
-GET http://localhost:8000/api/v1/stations HTTP/1.1
+GET http://localhost:8080/api/v1/stations HTTP/1.1
 
 ###
 
-GET http://localhost:8000/api/v1/stations/closest?latitude=8.20&longitude=7.8 HTTP/1.1
+GET http://localhost:8080/api/v1/stations/closest?latitude=9.07&longitude=7.39&station_type=gas HTTP/1.1
 
 
 
@@ -38,11 +53,11 @@ GET http://localhost:8000/api/v1/stations/closest?latitude=8.20&longitude=7.8 HT
 
 // COMMODITIES
 
-GET http://localhost:8000/api/v1/commodities HTTP/1.1
+GET http://localhost:8080/api/v1/commodities HTTP/1.1
 
 ###
 
-PATCH http://localhost:8000/api/v1/commodities/8ea3e299-6ff9-4319-b979-c760cd561a7f HTTP/1.1
+PATCH http://localhost:8080/api/v1/commodities/8ea3e299-6ff9-4319-b979-c760cd561a7f HTTP/1.1
 content-type: application/json
 
 {
