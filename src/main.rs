@@ -39,9 +39,11 @@ async fn main() {
 
     setup_tracing();
 
-    let allowed_origins = [
+    let allowed_origins = vec![
         "http://localhost:3000".parse::<HeaderValue>().expect("valid origin"),
         "http://127.0.0.1:3000".parse::<HeaderValue>().expect("valid origin"),
+        "http://localhost:8080".parse::<HeaderValue>().expect("valid origin"),
+        "http://127.0.0.1:8080".parse::<HeaderValue>().expect("valid origin"),
         "https://fuelfinder-leptos-csr.vercel.app".parse::<HeaderValue>().expect("valid origin"),
     ];
 
