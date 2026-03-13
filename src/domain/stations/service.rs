@@ -2,6 +2,7 @@ use crate::{
     app_state::AppState, authentication::station::authenticate::token::service::Claims, 
     domain::{
         stations::model::Station,
+        subscriptions::service::get_station_notifications,
         utils::{dto::{AllStationsQuery, StationQueryParam}, errors::station_errors::StationError, schemas::{StationResponse, StationWithCommodity, map_rows_to_stations}, validate_boundary},
     }
 };
@@ -145,5 +146,24 @@ impl Station {
             .ok_or_else(|| StationError::NotFound("Station not found".to_string()))?;
 
         Ok(Json(station_with_commodities))
+    }
+
+    pub async fn get_dashboard_notifications(
+        State(app_state): State<AppState>,
+        request: Request,
+    ) -> Result<Json<Vec<crate::domain::subscriptions::model::DashboardNotification>>, StationError>
+    {
+        let claims = request
+            .extensions()
+            .get::<Claims>()
+            .ok_or_else(|| StationError::NotFound("Claims not present".to_string()))?;
+
+        let station_id = claims.station_res.id;
+
+        let notifications = get_station_notifications(&app_state.pool, station_id)
+            .await
+            .map_err(|err| StationError::WrongCredentials(err.to_string()))?;
+
+        Ok(Json(notifications))
     }
 }

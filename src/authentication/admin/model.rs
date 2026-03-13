@@ -1,5 +1,7 @@
+use sqlx::FromRow;
 use uuid::Uuid;
 
+#[derive(FromRow)]
 pub struct Admins{
     pub id: Uuid,
     pub role: String,

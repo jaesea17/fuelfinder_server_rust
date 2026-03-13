@@ -12,5 +12,9 @@ pub fn stations_route() -> Router<AppState> {
             "/dashboard",
             get(Station::get_station).route_layer(from_fn(authorize)),
         )
+        .route(
+            "/dashboard/notifications",
+            get(Station::get_dashboard_notifications).route_layer(from_fn(authorize)),
+        )
         .route("/closest", get(Station::find_closest_stations))
 }

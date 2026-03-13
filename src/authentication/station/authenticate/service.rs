@@ -1,13 +1,20 @@
 use crate::{
-    app_state::{self, AppState},
-    authentication::{admin::{dto::CreateRegCodeDto, model::Admins, schema::ReturnedAdmin}, station::authenticate::{
+    app_state::AppState,
+    authentication::{admin::{dto::CreateRegCodeDto, model::Admins}, station::authenticate::{
         dto::{
-             CreateStationDto, StationSigninDto
+             CreateStationDto, RenewSubscriptionDto, StationSigninDto
         },
         token::service::{ApiMessage, TokenService},
     }},
     domain::{
-        commodities::model::Commodity, registration_code::dto::CodeCreatedMessage, stations::model::Station, utils::{errors::station_errors::StationError, schemas::{CommoditiesResponse, StationResponse, StationWithCommodity, map_rows_to_stations}}
+        commodities::model::Commodity,
+        registration_code::dto::CodeCreatedMessage,
+        stations::model::Station,
+        subscriptions::service::{
+            create_expired_signin_notification, create_trial_subscription,
+            is_station_subscription_expired, renew_subscription_manual,
+        },
+        utils::{errors::station_errors::StationError, schemas::{CommoditiesResponse, StationResponse, StationWithCommodity, map_rows_to_stations}}
     },
 };
 use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
@@ -77,6 +84,11 @@ impl Authentication {
             .await
             .map_err(StationError::DatabaseError)?;
         let station_id = new_station.id;
+
+        create_trial_subscription(&app_state.pool, station_id)
+            .await
+            .map_err(|err| StationError::WrongCredentials(err.to_string()))?;
+
         let name = station_type;
 
         //Creating Petrol or Gas commodity
@@ -172,6 +184,21 @@ impl Authentication {
             }
 
             Ok(true) => {
+                let station_id = rows[0].id;
+                let is_expired = is_station_subscription_expired(&app_state.pool, station_id)
+                    .await
+                    .map_err(|err| StationError::WrongCredentials(err.to_string()))?;
+
+                if is_expired {
+                    create_expired_signin_notification(&app_state.pool, station_id)
+                        .await
+                        .map_err(|err| StationError::WrongCredentials(err.to_string()))?;
+
+                    return Err(StationError::WrongCredentials(
+                        "subscription expired".to_string(),
+                    ));
+                }
+
                 // ✅ Password is CORRECT: Proceed with successful authentication
                 // Create JWT token...
                 let jwt_secret = env::var("JWT_SECRET")
@@ -203,6 +230,49 @@ impl Authentication {
                     .into_response())
             }
         }
+    }
+
+    pub async fn renew_subscription(
+        State(app_state): State<AppState>,
+        Json(body): Json<RenewSubscriptionDto>,
+    ) -> Result<impl IntoResponse, StationError> {
+        let RenewSubscriptionDto {
+            station_id,
+            days,
+            super_password,
+        } = body;
+
+        let admin: Admins = sqlx::query_as!(
+            Admins,
+            r#"
+            SELECT
+              id, role, password, created_at, updated_at
+            FROM admins
+            LIMIT 1
+            "#
+        )
+        .fetch_one(&app_state.pool)
+        .await
+        .map_err(StationError::DatabaseError)?;
+
+        let is_verified = Authentication::verify_password(&super_password, &admin.password)
+            .await
+            .map_err(|_| StationError::WrongCredentials("admin password".to_string()))?;
+
+        if !is_verified {
+            return Err(StationError::WrongCredentials("admin password".to_string()));
+        }
+
+        renew_subscription_manual(&app_state.pool, station_id, admin.id, days)
+            .await
+            .map_err(|err| StationError::WrongCredentials(err.to_string()))?;
+
+        Ok((
+            StatusCode::OK,
+            Json(CodeCreatedMessage {
+                code: "subscription renewed".to_string(),
+            }),
+        ))
     }
 
     pub async fn create_reg_code(

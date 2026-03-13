@@ -1,10 +1,7 @@
 #![forbid(clippy::unwrap_used)]
 
 use axum::Router;
-use http::{
-    HeaderValue,
-    header::{AUTHORIZATION, CONTENT_TYPE},
-};
+use http::{HeaderName, HeaderValue, header::{AUTHORIZATION, CONTENT_TYPE}};
 use tower_http::cors::{Any, CorsLayer};
 
 mod app_state;
@@ -13,9 +10,13 @@ mod domain;
 
 use crate::{
     app_state::AppState,
-    authentication::station::authenticate::routes::auth_routes,
+    authentication::{
+        admin::routes::admin_routes,
+        station::authenticate::routes::auth_routes,
+    },
     domain::{
         commodities::routes::commodities_route, stations::routes::stations_route,
+        subscriptions::worker::start as start_subscription_worker,
         utils::setup_tracing::setup_tracing,
     },
 };
@@ -50,11 +51,17 @@ async fn main() {
         // .allow_origin(tower_http::cors::AllowOrigin::mirror_request())
         .allow_origin(origins)
         .allow_methods(Any)
-        .allow_headers([AUTHORIZATION, CONTENT_TYPE]);
+        .allow_headers([
+            AUTHORIZATION,
+            CONTENT_TYPE,
+            HeaderName::from_static("x-admin-password"),
+        ]);
 
     let app_state = AppState::init()
         .await
         .expect("Failed to initialize database");
+
+    tokio::spawn(start_subscription_worker(app_state.pool.clone()));
 
     let app = Router::new()
         .nest(
@@ -62,7 +69,8 @@ async fn main() {
             Router::new()
                 .nest("/auth", auth_routes())
                 .nest("/stations", stations_route())
-                .nest("/commodities", commodities_route()),
+                .nest("/commodities", commodities_route())
+                .nest("/admin", admin_routes()),
         )
         .with_state(app_state)
         .layer(cors);
