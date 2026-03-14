@@ -1,9 +1,9 @@
 #![forbid(clippy::unwrap_used)]
 
 use axum::Router;
-use http::{HeaderName, HeaderValue, header::{AUTHORIZATION, CONTENT_TYPE}};
+use http::{HeaderName, header::{AUTHORIZATION, CONTENT_TYPE}};
 use std::collections::HashSet;
-use tower_http::cors::{AllowOrigin, Any, CorsLayer};
+use tower_http::cors::{Any, CorsLayer};
 
 mod app_state;
 mod authentication;
@@ -58,19 +58,10 @@ async fn main() {
 
     setup_tracing();
 
-    let allowed_origins = cors_allowed_origins();
+    let _allowed_origins = cors_allowed_origins();
 
     let cors = CorsLayer::new()
-        .allow_origin(AllowOrigin::predicate(
-            move |origin: &HeaderValue, _request_parts| {
-                let Ok(origin_str) = origin.to_str() else {
-                    return false;
-                };
-
-                // Allow exact configured origins and all Vercel preview/production domains.
-                allowed_origins.contains(origin_str) || origin_str.ends_with(".vercel.app")
-            },
-        ))
+        .allow_origin(Any)
         .allow_methods(Any)
         .allow_headers([
             AUTHORIZATION,
