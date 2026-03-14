@@ -2,7 +2,8 @@
 
 use axum::Router;
 use http::{HeaderName, HeaderValue, header::{AUTHORIZATION, CONTENT_TYPE}};
-use tower_http::cors::{Any, CorsLayer};
+use std::collections::HashSet;
+use tower_http::cors::{AllowOrigin, Any, CorsLayer};
 
 mod app_state;
 mod authentication;
@@ -33,22 +34,43 @@ fn listen_addr() -> String {
     format!("0.0.0.0:{}", port)
 }
 
+fn cors_allowed_origins() -> HashSet<String> {
+    let mut allowed = HashSet::from([
+        "http://localhost:3000".to_string(),
+        "http://127.0.0.1:3000".to_string(),
+        "http://localhost:8080".to_string(),
+        "http://127.0.0.1:8080".to_string(),
+        "https://fuelfinder-leptos-csr.vercel.app".to_string(),
+    ]);
+
+    if let Ok(origins) = std::env::var("CORS_ALLOW_ORIGINS") {
+        for origin in origins.split(',').map(str::trim).filter(|o| !o.is_empty()) {
+            allowed.insert(origin.to_string());
+        }
+    }
+
+    allowed
+}
+
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
 
     setup_tracing();
 
-    let allowed_origins = vec![
-        "http://localhost:3000".parse::<HeaderValue>().expect("valid origin"),
-        "http://127.0.0.1:3000".parse::<HeaderValue>().expect("valid origin"),
-        "http://localhost:8080".parse::<HeaderValue>().expect("valid origin"),
-        "http://127.0.0.1:8080".parse::<HeaderValue>().expect("valid origin"),
-        "https://fuelfinder-leptos-csr.vercel.app".parse::<HeaderValue>().expect("valid origin"),
-    ];
+    let allowed_origins = cors_allowed_origins();
 
     let cors = CorsLayer::new()
-        .allow_origin(allowed_origins)
+        .allow_origin(AllowOrigin::predicate(
+            move |origin: &HeaderValue, _request_parts| {
+                let Ok(origin_str) = origin.to_str() else {
+                    return false;
+                };
+
+                // Allow exact configured origins and all Vercel preview/production domains.
+                allowed_origins.contains(origin_str) || origin_str.ends_with(".vercel.app")
+            },
+        ))
         .allow_methods(Any)
         .allow_headers([
             AUTHORIZATION,
