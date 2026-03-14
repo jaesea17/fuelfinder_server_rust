@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                    INSERT INTO registration_codes (\n                        code\n                    )\n                    VALUES ($1)\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cab70075abe6dd6aa10c29ed608404b4d7729a73144891f3835f66822d1b237a"
+}

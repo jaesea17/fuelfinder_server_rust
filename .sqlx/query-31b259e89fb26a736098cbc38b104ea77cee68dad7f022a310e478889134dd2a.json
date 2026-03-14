@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                SELECT\n                    id, name, address, email, phone, \n                    latitude, longitude, role,\n                    created_at, updated_at \n                FROM stations\n            ",
+  "query": "\n                SELECT\n                    id, name, address, email, phone, \n                    latitude, longitude, role, station_type,\n                    created_at, updated_at \n                FROM stations\n                WHERE ($1::text IS NULL OR station_type = $1)\n            ",
   "describe": {
     "columns": [
       {
@@ -45,19 +45,27 @@
       },
       {
         "ordinal": 8,
+        "name": "station_type",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
         "name": "created_at",
         "type_info": "Timestamp"
       },
       {
-        "ordinal": 9,
+        "ordinal": 10,
         "name": "updated_at",
         "type_info": "Timestamp"
       }
     ],
     "parameters": {
-      "Left": []
+      "Left": [
+        "Text"
+      ]
     },
     "nullable": [
+      false,
       false,
       false,
       false,
@@ -70,5 +78,5 @@
       false
     ]
   },
-  "hash": "df485a8a1bd4826feef71db1ae8e91aaf7fa2074a853ad8161f82b14d7f533df"
+  "hash": "31b259e89fb26a736098cbc38b104ea77cee68dad7f022a310e478889134dd2a"
 }

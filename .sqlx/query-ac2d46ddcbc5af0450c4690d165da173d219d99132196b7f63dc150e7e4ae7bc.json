@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                INSERT INTO stations (\n                    name, address, email, phone, password, latitude, longitude\n                )\n                VALUES ($1, $2, $3, $4, $5, $6, $7)\n                RETURNING id, name, address, email, phone, latitude, longitude, role, created_at, updated_at\n            ",
+  "query": "\n                    INSERT INTO stations (\n                        name, address, email, phone, password, latitude, longitude, station_type\n                    )\n                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)\n                    RETURNING id, name, address, email, phone, latitude, longitude, role, station_type, created_at, updated_at\n                ",
   "describe": {
     "columns": [
       {
@@ -45,11 +45,16 @@
       },
       {
         "ordinal": 8,
+        "name": "station_type",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
         "name": "created_at",
         "type_info": "Timestamp"
       },
       {
-        "ordinal": 9,
+        "ordinal": 10,
         "name": "updated_at",
         "type_info": "Timestamp"
       }
@@ -62,7 +67,8 @@
         "Varchar",
         "Varchar",
         "Float8",
-        "Float8"
+        "Float8",
+        "Text"
       ]
     },
     "nullable": [
@@ -75,8 +81,9 @@
       false,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "cc2e6226da02b8c3e932768e2aed1f98984883f9bf6d8e2ea2ba75f3ec8eddd1"
+  "hash": "ac2d46ddcbc5af0450c4690d165da173d219d99132196b7f63dc150e7e4ae7bc"
 }

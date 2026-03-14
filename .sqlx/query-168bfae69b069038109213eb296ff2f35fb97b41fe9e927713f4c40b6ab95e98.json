@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT 1 FROM stations WHERE email = $1",
+  "query": "SELECT 1 FROM stations WHERE email = $1 AND station_type = $2",
   "describe": {
     "columns": [
       {
@@ -11,6 +11,7 @@
     ],
     "parameters": {
       "Left": [
+        "Text",
         "Text"
       ]
     },
@@ -18,5 +19,5 @@
       null
     ]
   },
-  "hash": "9989813aa042623bbc5e1206ebc8dd065dace36f21bfd0dfe794d9b4adcc420d"
+  "hash": "168bfae69b069038109213eb296ff2f35fb97b41fe9e927713f4c40b6ab95e98"
 }
