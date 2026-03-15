@@ -150,6 +150,27 @@ pub async fn get_station_notifications(
     Ok(notifications)
 }
 
+pub async fn mark_station_notification_read(
+    pool: &PgPool,
+    station_id: Uuid,
+    notification_id: Uuid,
+) -> anyhow::Result<bool> {
+    let rows_affected = sqlx::query(
+        r#"
+        UPDATE notifications
+        SET is_read = TRUE
+        WHERE id = $1 AND station_id = $2
+        "#,
+    )
+    .bind(notification_id)
+    .bind(station_id)
+    .execute(pool)
+    .await?
+    .rows_affected();
+
+    Ok(rows_affected > 0)
+}
+
 async fn create_reminder_log_once(
     pool: &PgPool,
     subscription_id: Uuid,
@@ -195,7 +216,7 @@ async fn send_subscription_email(
     let smtp_host = match env::var("SMTP_HOST") {
         Ok(v) => v,
         Err(_) => {
-            tracing::warn!("SMTP_HOST missing; skipping email send");
+            tracing::warn!("SMTP_HOST missing; skipping email send to {station_email}");
             return Ok(());
         }
     };

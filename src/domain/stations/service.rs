@@ -2,14 +2,16 @@ use crate::{
     app_state::AppState, authentication::station::authenticate::token::service::Claims, 
     domain::{
         stations::model::Station,
-        subscriptions::service::get_station_notifications,
+        subscriptions::service::{get_station_notifications, mark_station_notification_read},
         utils::{dto::{AllStationsQuery, StationQueryParam}, errors::station_errors::StationError, schemas::{StationResponse, StationWithCommodity, map_rows_to_stations}, validate_boundary},
     }
 };
 use axum::{
+    http::StatusCode,
     Json,
-    extract::{Query, Request, State},
+    extract::{Path, Query, Request, State},
 };
+use uuid::Uuid;
 
 impl Station {
     pub async fn get_stations(
@@ -165,5 +167,28 @@ impl Station {
             .map_err(|err| StationError::WrongCredentials(err.to_string()))?;
 
         Ok(Json(notifications))
+    }
+
+    pub async fn mark_dashboard_notification_read(
+        State(app_state): State<AppState>,
+        Path(notification_id): Path<Uuid>,
+        request: Request,
+    ) -> Result<StatusCode, StationError> {
+        let claims = request
+            .extensions()
+            .get::<Claims>()
+            .ok_or_else(|| StationError::NotFound("Claims not present".to_string()))?;
+
+        let station_id = claims.station_res.id;
+
+        let was_updated = mark_station_notification_read(&app_state.pool, station_id, notification_id)
+            .await
+            .map_err(|err| StationError::WrongCredentials(err.to_string()))?;
+
+        if !was_updated {
+            return Err(StationError::NotFound(notification_id.to_string()));
+        }
+
+        Ok(StatusCode::NO_CONTENT)
     }
 }
