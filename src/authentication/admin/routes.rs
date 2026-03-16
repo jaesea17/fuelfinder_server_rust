@@ -7,7 +7,7 @@ pub fn admin_routes() -> Router<AppState> {
         .route("/stations", get(AdminService::get_stations))
         .route("/discounts/stats", get(AdminService::get_discount_stats))
         .route(
-            "/discounts/:commodity_id",
+            "/discounts/{commodity_id}",
             patch(AdminService::update_discount_config),
         )
 }

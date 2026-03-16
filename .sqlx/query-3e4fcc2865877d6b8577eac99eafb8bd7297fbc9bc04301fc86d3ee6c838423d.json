@@ -1,0 +1,137 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                s.id AS id,\n                s.name AS name,\n                s.address AS address,\n                s.email AS email,\n                s.password AS password,\n                s.phone AS phone,\n                s.latitude AS latitude,\n                s.longitude AS longitude,\n                s.role AS role,\n                s.created_at AS created_at,\n                s.station_type AS station_type,\n                s.updated_at AS updated_at,\n                                s.distance AS \"distance?\",\n                                c.id AS \"commodity_id!\",\n                                c.name AS \"commodity_name!\",\n                                c.price AS \"price!\",\n                                c.is_available AS \"is_available!\",\n                                c.station_id AS \"station_id!\",\n                                cd.is_enabled AS \"discount_enabled?\",\n                                cd.percentage AS \"discount_percentage?\"\n            FROM stations s\n            LEFT JOIN commodities c ON s.id = c.station_id\n            LEFT JOIN commodity_discounts cd ON cd.commodity_id = c.id\n            WHERE s.id = $1\n              AND s.station_type = $2\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "address",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "password",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "phone",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "latitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "longitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 8,
+        "name": "role",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 10,
+        "name": "station_type",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 11,
+        "name": "updated_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 12,
+        "name": "distance?",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 13,
+        "name": "commodity_id!",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 14,
+        "name": "commodity_name!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 15,
+        "name": "price!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 16,
+        "name": "is_available!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 17,
+        "name": "station_id!",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 18,
+        "name": "discount_enabled?",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 19,
+        "name": "discount_percentage?",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "3e4fcc2865877d6b8577eac99eafb8bd7297fbc9bc04301fc86d3ee6c838423d"
+}

@@ -17,7 +17,7 @@ pub fn stations_route() -> Router<AppState> {
             get(Station::get_dashboard_notifications).route_layer(from_fn(authorize)),
         )
         .route(
-            "/dashboard/notifications/:notification_id/read",
+            "/dashboard/notifications/{notification_id}/read",
             patch(Station::mark_dashboard_notification_read).route_layer(from_fn(authorize)),
         )
         .route("/closest", get(Station::find_closest_stations))
