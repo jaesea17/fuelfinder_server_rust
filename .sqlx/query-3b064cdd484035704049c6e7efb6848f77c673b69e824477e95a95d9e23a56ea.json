@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                SELECT \n                    s.id, s.name, s.address, s.email, s.phone, \n                    s.latitude, s.longitude, s.role, s.station_type,\n                    s.password, s.created_at, s.updated_at,\n                    NULL::float8 as \"distance?\", \n                    c.id as commodity_id, \n                    c.name as commodity_name, \n                    c.is_available as \"is_available!\", \n                    c.price as price,\n                    c.station_id as \"station_id!\"\n                FROM stations s\n                INNER JOIN commodities c ON s.id = c.station_id\n                WHERE s.email = $1 AND s.station_type = $2\n            ",
+  "query": "\n                SELECT \n                    s.id, s.name, s.address, s.email, s.phone, \n                    s.latitude, s.longitude, s.role, s.station_type,\n                    s.password, s.created_at, s.updated_at,\n                    NULL::float8 as \"distance?\", \n                    c.id as commodity_id, \n                    c.name as commodity_name, \n                    c.is_available as \"is_available!\", \n                    c.price as price,\n                    c.station_id as \"station_id!\",\n                    NULL::bool as \"discount_enabled?\",\n                    NULL::int4 as \"discount_percentage?\"\n                FROM stations s\n                INNER JOIN commodities c ON s.id = c.station_id\n                WHERE s.email = $1 AND s.station_type = $2\n            ",
   "describe": {
     "columns": [
       {
@@ -92,6 +92,16 @@
         "ordinal": 17,
         "name": "station_id!",
         "type_info": "Uuid"
+      },
+      {
+        "ordinal": 18,
+        "name": "discount_enabled?",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 19,
+        "name": "discount_percentage?",
+        "type_info": "Int4"
       }
     ],
     "parameters": {
@@ -118,8 +128,10 @@
       false,
       false,
       false,
-      false
+      false,
+      null,
+      null
     ]
   },
-  "hash": "781534022a891934376ded4f383cc63336e41c08ebb63dda2c0e0365db55879a"
+  "hash": "3b064cdd484035704049c6e7efb6848f77c673b69e824477e95a95d9e23a56ea"
 }

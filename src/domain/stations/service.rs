@@ -55,8 +55,7 @@ impl Station {
 
         let _ = validate_boundary::validate_abuja_bounds(latitude, longitude)?;
 
-        let rows = sqlx::query_as!(
-            StationWithCommodity,
+        let rows = sqlx::query_as::<_, StationWithCommodity>(
             r#"
             SELECT
                 s.id AS id,
@@ -76,9 +75,12 @@ impl Station {
                 c.name AS commodity_name,
                 c.is_available AS "is_available!",
                 c.station_id AS "station_id!",
-                c.price AS price
+                                c.price AS price,
+                                cd.is_enabled AS discount_enabled,
+                                cd.percentage AS discount_percentage
             FROM stations AS s
             INNER JOIN commodities AS c ON s.id = c.station_id AND c.is_available = TRUE
+                        LEFT JOIN commodity_discounts AS cd ON cd.commodity_id = c.id
             WHERE ($3::text IS NULL OR s.station_type = $3)
               AND s.id IN (
                 SELECT sub_s.id
@@ -93,10 +95,10 @@ impl Station {
             )
             ORDER BY "distance!", s.id, c.name
             "#,
-            latitude, 
-            longitude,
-            station_type
         )
+        .bind(latitude)
+        .bind(longitude)
+        .bind(station_type)
         .fetch_all(&app_state.pool)
         .await
         .map_err(StationError::DatabaseError)?;
@@ -118,26 +120,38 @@ impl Station {
         let station_id = claims.station_res.id;
         let station_type = claims.station_res.station_type.clone();
 
-        let rows = sqlx::query_as!(
-            StationWithCommodity,
+        let rows = sqlx::query_as::<_, StationWithCommodity>(
             r#"
             SELECT
-                s.id, s.name, s.address, s.email, s.password, s.phone,
-                s.latitude, s.longitude, s.role, s.created_at, s.station_type,
-                s.updated_at, s.distance,
+                s.id AS id,
+                s.name AS name,
+                s.address AS address,
+                s.email AS email,
+                s.password AS password,
+                s.phone AS phone,
+                s.latitude AS latitude,
+                s.longitude AS longitude,
+                s.role AS role,
+                s.created_at AS created_at,
+                s.station_type AS station_type,
+                s.updated_at AS updated_at,
+                s.distance AS distance,
                 c.id AS commodity_id,
                 c.name AS commodity_name,
-                c.price,
-                c.is_available,
-                c.station_id
+                c.price AS price,
+                c.is_available AS is_available,
+                c.station_id AS station_id,
+                cd.is_enabled AS discount_enabled,
+                cd.percentage AS discount_percentage
             FROM stations s
             LEFT JOIN commodities c ON s.id = c.station_id
+            LEFT JOIN commodity_discounts cd ON cd.commodity_id = c.id
             WHERE s.id = $1
               AND s.station_type = $2
             "#,
-            station_id,
-            station_type
         )
+        .bind(station_id)
+        .bind(station_type)
         .fetch_all(&app_state.pool)
         .await
         .map_err(StationError::DatabaseError)?;

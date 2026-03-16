@@ -29,6 +29,8 @@ pub struct StationWithCommodity {
     pub is_available: bool,
     pub price: i32,
     pub station_id: Uuid,
+    pub discount_enabled: Option<bool>,
+    pub discount_percentage: Option<i32>,
 }
 
 #[derive(Serialize, Debug, Clone, Deserialize, sqlx::FromRow)]
@@ -56,6 +58,8 @@ pub struct CommoditiesResponse {
     pub is_available: bool,
     pub price: i32,
     pub station_id: Uuid,
+    pub discount_enabled: Option<bool>,
+    pub discount_percentage: Option<i32>,
 }
 
 impl From<Vec<StationWithCommodity>> for StationResponse {
@@ -87,6 +91,8 @@ impl From<Vec<StationWithCommodity>> for StationResponse {
                     is_available: row.is_available,
                     price: row.price,
                     station_id: row.station_id,
+                    discount_enabled: row.discount_enabled,
+                    discount_percentage: row.discount_percentage,
                 })
                 .collect(),
         }
@@ -126,6 +132,8 @@ pub fn map_rows_to_stations(rows: Vec<StationWithCommodity>) -> Vec<StationRespo
             is_available: row.is_available,
             price: row.price,
             station_id: row.station_id,
+            discount_enabled: row.discount_enabled,
+            discount_percentage: row.discount_percentage,
         });
     }
 

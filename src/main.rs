@@ -16,7 +16,8 @@ use crate::{
         station::authenticate::routes::auth_routes,
     },
     domain::{
-        commodities::routes::commodities_route, stations::routes::stations_route,
+        commodities::routes::commodities_route, discounts::routes::discounts_route,
+        stations::routes::stations_route,
         subscriptions::worker::start as start_subscription_worker,
         utils::setup_tracing::setup_tracing,
     },
@@ -85,6 +86,7 @@ async fn main() {
                 .nest("/auth", auth_routes())
                 .nest("/stations", stations_route())
                 .nest("/commodities", commodities_route())
+                .nest("/discounts", discounts_route())
                 .nest("/admin", admin_routes()),
         )
         .with_state(app_state)

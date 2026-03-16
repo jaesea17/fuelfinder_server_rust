@@ -132,6 +132,8 @@ impl Authentication {
             is_available: new_commodity.is_available,
             price: new_commodity.price,
             station_id: new_commodity.station_id,
+            discount_enabled: None,
+            discount_percentage: None,
         }];
         Ok((StatusCode::CREATED, Json(new_station)))
     }
@@ -157,7 +159,9 @@ impl Authentication {
                     c.name as commodity_name, 
                     c.is_available as "is_available!", 
                     c.price as price,
-                    c.station_id as "station_id!"
+                    c.station_id as "station_id!",
+                    NULL::bool as "discount_enabled?",
+                    NULL::int4 as "discount_percentage?"
                 FROM stations s
                 INNER JOIN commodities c ON s.id = c.station_id
                 WHERE s.email = $1 AND s.station_type = $2
