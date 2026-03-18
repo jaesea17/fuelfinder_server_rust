@@ -25,6 +25,7 @@ use crate::{
 pub struct DiscountService;
 
 const MAX_CODES_PER_IP_PER_STATION_PER_DAY: i64 = 1;
+const MAX_CODE_GENERATE_RETRY: i64 = 8;
 
 fn station_code_prefix(station_name: &str) -> String {
     let mut chars = station_name
@@ -178,7 +179,7 @@ impl DiscountService {
 
         let mut inserted: Option<DiscountCode> = None;
 
-        for _ in 0..8 {
+        for _ in 0..MAX_CODE_GENERATE_RETRY {
             let candidate_code = generate_candidate_code(&station_name, &station_type);
 
             let maybe_code = sqlx::query_as::<_, DiscountCode>(
