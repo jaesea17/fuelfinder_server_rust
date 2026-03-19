@@ -24,7 +24,7 @@ use crate::{
 
 pub struct DiscountService;
 
-const MAX_CODES_PER_IP_PER_STATION_PER_DAY: i64 = 1;
+const MAX_CODES_PER_IP_PER_STATION_PER_DAY: i64 = 3;
 const MAX_CODE_GENERATE_RETRY: i64 = 8;
 
 fn station_code_prefix(station_name: &str) -> String {
