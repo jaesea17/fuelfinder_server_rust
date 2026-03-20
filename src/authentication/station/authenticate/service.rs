@@ -57,7 +57,7 @@ impl Authentication {
             return Err(StationError::AlreadyExists);
         };
 
-        let name = body.name.trim();
+        let name = body.name.trim().to_uppercase();
         let address = body.address.trim();
         let phone = body.phone.trim();
         let password = body.password;

@@ -4,3 +4,4 @@ pub mod setup_tracing;
 pub mod schemas;
 pub mod dto;
 pub mod validate_boundary;
+pub mod rate_limiter;
