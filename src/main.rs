@@ -1,6 +1,10 @@
 #![forbid(clippy::unwrap_used)]
 
-use axum::Router;
+use axum::{
+    Router,
+    http::StatusCode,
+    routing::get,
+};
 use http::{HeaderName, header::{AUTHORIZATION, CONTENT_TYPE}};
 use std::collections::HashSet;
 use tower_http::cors::{Any, CorsLayer};
@@ -53,6 +57,10 @@ fn cors_allowed_origins() -> HashSet<String> {
     allowed
 }
 
+async fn healthz() -> StatusCode {
+    StatusCode::OK
+}
+
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
@@ -80,9 +88,11 @@ async fn main() {
     tokio::spawn(start_subscription_worker(app_state.pool.clone()));
 
     let app = Router::new()
+        .route("/healthz", get(healthz))
         .nest(
             "/api/v1",
             Router::new()
+                .route("/healthz", get(healthz))
                 .nest("/auth", auth_routes())
                 .nest("/stations", stations_route())
                 .nest("/commodities", commodities_route())
