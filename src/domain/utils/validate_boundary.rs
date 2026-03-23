@@ -1,16 +1,19 @@
 use crate::domain::utils::errors::station_errors::StationError;
 
-pub fn validate_abuja_bounds(lat: f64, lon: f64) -> Result<(), StationError> {
-    let min_lat = 8.25;
-    let max_lat = 9.30;
-    let min_lon = 6.75;
-    let max_lon = 7.75;
+pub const ABUJA_MIN_LAT: f64 = 8.25;
+pub const ABUJA_MAX_LAT: f64 = 9.30;
+pub const ABUJA_MIN_LON: f64 = 6.75;
+pub const ABUJA_MAX_LON: f64 = 7.75;
 
-    if lat >= min_lat && lat <= max_lat && lon >= min_lon && lon <= max_lon {
+pub fn validate_abuja_bounds(lat: f64, lon: f64) -> Result<(), StationError> {
+    let in_lat_range = (ABUJA_MIN_LAT..=ABUJA_MAX_LAT).contains(&lat);
+    let in_lon_range = (ABUJA_MIN_LON..=ABUJA_MAX_LON).contains(&lon);
+
+    if in_lat_range && in_lon_range {
         Ok(())
     } else {
         Err(StationError::WrongCredentials(
-            "Possibly outside service area".to_string(),
+            "Location is outside Abuja service area".to_string(),
         ))
     }
 }

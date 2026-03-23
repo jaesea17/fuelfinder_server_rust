@@ -299,9 +299,13 @@ impl Authentication {
 
         let stored_hashed = admin.password;
 
-        let _is_verified = Authentication::verify_password(&super_password, &stored_hashed)
-        .await
-        .expect("couldn't verify password");
+        let is_verified = Authentication::verify_password(&super_password, &stored_hashed)
+            .await
+            .map_err(|_| StationError::WrongCredentials("admin password".to_string()))?;
+
+        if !is_verified {
+            return Err(StationError::WrongCredentials("admin password".to_string()));
+        }
 
         sqlx::query!(
                 r#"

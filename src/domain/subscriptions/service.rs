@@ -248,6 +248,21 @@ async fn send_subscription_email(
     Ok(())
 }
 
+fn eligible_reminder_type(time_left: Duration) -> Option<ReminderType> {
+    if time_left <= Duration::zero() {
+        return None;
+    }
+
+    let whole_days_left = time_left.num_days();
+
+    match whole_days_left {
+        7 => Some(ReminderType::D7),
+        4 => Some(ReminderType::D4),
+        0 | 1 => Some(ReminderType::D1),
+        _ => None,
+    }
+}
+
 pub async fn run_subscription_reminder_cycle(pool: &PgPool) -> anyhow::Result<()> {
     let subscriptions = sqlx::query_as::<_, Subscription>(
         r#"
@@ -292,48 +307,31 @@ pub async fn run_subscription_reminder_cycle(pool: &PgPool) -> anyhow::Result<()
         }
 
         let time_left = subscription.ends_at - now;
-        let checks = [ReminderType::D7, ReminderType::D4, ReminderType::D1];
+        let Some(reminder_type) = eligible_reminder_type(time_left) else {
+            continue;
+        };
 
-        for reminder_type in checks {
-            let in_window = match reminder_type {
-                ReminderType::D7 => {
-                    time_left <= Duration::days(7) && time_left > Duration::days(4)
-                }
-                ReminderType::D4 => {
-                    time_left <= Duration::days(4) && time_left > Duration::days(1)
-                }
-                ReminderType::D1 => {
-                    time_left <= Duration::days(1) && time_left > Duration::zero()
-                }
-                ReminderType::Expired => false,
-            };
-
-            if !in_window {
-                continue;
-            }
-
-            if !create_reminder_log_once(pool, subscription.id, reminder_type).await? {
-                continue;
-            }
-
-            let day_count = reminder_type.days_left();
-            let body = format!(
-                "Your subscription expires in {} day(s). Please renew to avoid interruption.",
-                day_count
-            );
-
-            create_dashboard_notification(
-                pool,
-                subscription.station_id,
-                "Subscription reminder",
-                &body,
-                SUBSCRIPTION_KIND,
-            )
-            .await?;
-
-            let subject = format!("Subscription expires in {} day(s)", day_count);
-            send_subscription_email(pool, &station_email, &subject, &body).await?;
+        if !create_reminder_log_once(pool, subscription.id, reminder_type).await? {
+            continue;
         }
+
+        let day_count = reminder_type.days_left();
+        let body = format!(
+            "Your subscription expires in {} day(s). Please renew to avoid interruption.",
+            day_count
+        );
+
+        create_dashboard_notification(
+            pool,
+            subscription.station_id,
+            "Subscription reminder",
+            &body,
+            SUBSCRIPTION_KIND,
+        )
+        .await?;
+
+        let subject = format!("Subscription expires in {} day(s)", day_count);
+        send_subscription_email(pool, &station_email, &subject, &body).await?;
     }
 
     Ok(())
